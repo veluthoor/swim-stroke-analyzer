@@ -14,3 +14,11 @@ build/
 *.mov
 !examples/*.mp4
 output/
+
+# Web app specific
+backend/uploads/
+backend/results/
+frontend/node_modules/
+frontend/build/
+*_report.txt
+*_analyzed.*
