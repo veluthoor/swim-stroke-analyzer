@@ -279,11 +279,6 @@ Focus on these in order:
 - **30-second video:** ~2-3 minutes
 - **60-second video:** ~4-6 minutes
 
-**Why so fast?** Smart optimizations:
-- Frame skipping (analyzes every 2nd frame)
-- Optimized AI model
-- Efficient video codec
-
 ---
 
 ## How It Actually Works
