@@ -15,7 +15,7 @@ class PoseDetector:
         self.pose = self.mp_pose.Pose(
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence,
-            model_complexity=2  # Use most accurate model
+            model_complexity=1  # Balanced speed/accuracy (was 2, way too slow)
         )
 
         # Key landmarks for swimming analysis
@@ -73,31 +73,39 @@ class PoseDetector:
             'frame_shape': (h, w)
         }
 
-    def process_video(self, video_path: str) -> List[Dict]:
+    def process_video(self, video_path: str, skip_frames: int = 2) -> List[Dict]:
         """
-        Process entire video and extract pose data for each frame.
+        Process video and extract pose data (skips frames for speed).
 
         Args:
             video_path: Path to video file
+            skip_frames: Process every Nth frame (2 = 2x faster, 3 = 3x faster)
 
         Returns:
-            List of pose data dictionaries, one per frame
+            List of pose data dictionaries, one per processed frame
         """
         cap = cv2.VideoCapture(video_path)
         pose_data = []
 
         frame_count = 0
+        processed_count = 0
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = cap.get(cv2.CAP_PROP_FPS)
 
-        print(f"Processing video: {total_frames} frames at {fps:.2f} fps")
+        print(f"Processing video: {total_frames} frames at {fps:.2f} fps (analyzing every {skip_frames} frames)")
 
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
 
+            # Skip frames for performance
+            if frame_count % skip_frames != 0:
+                frame_count += 1
+                continue
+
             pose_result = self.detect_pose(frame)
+            processed_count += 1
 
             pose_data.append({
                 'frame_number': frame_count,
@@ -107,11 +115,12 @@ class PoseDetector:
             })
 
             frame_count += 1
-            if frame_count % 30 == 0:
-                print(f"Processed {frame_count}/{total_frames} frames")
+            if processed_count % 15 == 0:  # Show progress more often
+                pct = (frame_count / total_frames) * 100
+                print(f"Progress: {pct:.1f}% ({processed_count} frames analyzed)")
 
         cap.release()
-        print(f"Completed: {len(pose_data)} frames processed")
+        print(f"✓ Completed: {processed_count} frames analyzed ({total_frames} total, skipped {total_frames - processed_count})")
 
         return pose_data
 

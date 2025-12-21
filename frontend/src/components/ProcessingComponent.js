@@ -2,11 +2,28 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
+const processingMessages = [
+  "🔍 Detecting your body movements...",
+  "🤖 AI is watching you swim (not creepy, promise)",
+  "📐 Calculating arm angles...",
+  "🏊‍♂️ Checking your stroke rhythm...",
+  "📊 Analyzing technique like an Olympic coach...",
+  "🎬 Making you look good on camera...",
+  "✨ Adding some visual magic..."
+];
+
 function ProcessingComponent({ videoId, onComplete }) {
   const [status, setStatus] = useState({ progress: 0, message: 'Starting analysis...' });
   const [error, setError] = useState(null);
+  const [funMessage, setFunMessage] = useState(processingMessages[0]);
 
   useEffect(() => {
+    // Change fun messages periodically
+    const messageInterval = setInterval(() => {
+      const randomMessage = processingMessages[Math.floor(Math.random() * processingMessages.length)];
+      setFunMessage(randomMessage);
+    }, 3000);
+
     const pollStatus = setInterval(async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/status/${videoId}`);
@@ -17,63 +34,164 @@ function ProcessingComponent({ videoId, onComplete }) {
 
           if (data.status === 'completed') {
             clearInterval(pollStatus);
+            clearInterval(messageInterval);
             setTimeout(() => onComplete(), 1000);
           } else if (data.status === 'failed') {
             clearInterval(pollStatus);
+            clearInterval(messageInterval);
             setError(data.error || 'Analysis failed. Please try again.');
           }
         }
       } catch (err) {
         console.error('Error polling status:', err);
       }
-    }, 2000); // Poll every 2 seconds
+    }, 2000);
 
-    return () => clearInterval(pollStatus);
+    return () => {
+      clearInterval(pollStatus);
+      clearInterval(messageInterval);
+    };
   }, [videoId, onComplete]);
 
+  const getStageEmoji = (progress) => {
+    if (progress < 20) return '🚀';
+    if (progress < 50) return '🔍';
+    if (progress < 70) return '📊';
+    if (progress < 90) return '🎬';
+    return '✅';
+  };
+
   return (
-    <div className="card">
-      <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>
-        Analyzing Your Swim Technique...
-      </h2>
+    <div>
+      <div className="card" style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '4rem', marginBottom: '20px', animation: 'float 3s ease-in-out infinite' }}>
+          {getStageEmoji(status.progress || 0)}
+        </div>
+        <h2 style={{ fontSize: '2rem', marginBottom: '15px', color: 'white' }}>
+          Analyzing Your Swim...
+        </h2>
+        <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
+          {funMessage}
+        </p>
+      </div>
 
       {!error && (
-        <div className="progress-container">
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{ width: `${status.progress || 0}%` }}
-            >
-              {status.progress || 0}%
+        <div className="card">
+          <div className="progress-container">
+            <div className="progress-bar" style={{ height: '40px', borderRadius: '20px' }}>
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${status.progress || 0}%`,
+                  background: 'linear-gradient(90deg, #667eea, #764ba2)',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                {status.progress || 0}%
+              </div>
+            </div>
+
+            <div style={{
+              textAlign: 'center',
+              marginTop: '25px',
+              fontSize: '1.1rem',
+              color: '#555'
+            }}>
+              {status.message || 'Processing...'}
             </div>
           </div>
-          <div className="status-message">
-            {status.message || 'Processing...'}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <div className="loading-spinner"></div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '15px',
+            marginTop: '30px'
+          }}>
+            {[
+              { icon: '🔍', label: 'Detecting Pose', done: status.progress >= 20 },
+              { icon: '📐', label: 'Measuring Angles', done: status.progress >= 50 },
+              { icon: '📊', label: 'Analyzing Form', done: status.progress >= 70 },
+              { icon: '🎬', label: 'Creating Video', done: status.progress >= 90 },
+              { icon: '📝', label: 'Writing Report', done: status.progress >= 100 }
+            ].map((step, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: step.done ? '#E8F5E9' : '#F5F5F5',
+                  border: `2px solid ${step.done ? '#36B37E' : '#E0E0E0'}`,
+                  borderRadius: '12px',
+                  padding: '15px',
+                  textAlign: 'center',
+                  transition: 'all 0.3s ease',
+                  transform: step.done ? 'scale(1.05)' : 'scale(1)'
+                }}
+              >
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>
+                  {step.done ? '✅' : step.icon}
+                </div>
+                <div style={{
+                  fontSize: '0.9rem',
+                  color: step.done ? '#36B37E' : '#666',
+                  fontWeight: step.done ? 'bold' : 'normal'
+                }}>
+                  {step.label}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
       {error && (
-        <div className="error-message">
-          <strong>Error:</strong> {error}
+        <div className="card">
+          <div style={{
+            background: '#FFF3F3',
+            border: '2px solid #D32F2F',
+            borderRadius: '12px',
+            padding: '30px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '4rem', marginBottom: '20px' }}>😕</div>
+            <h3 style={{ color: '#D32F2F', marginBottom: '15px' }}>
+              Oops! Something went wrong
+            </h3>
+            <p style={{ color: '#666', fontSize: '1.1rem' }}>{error}</p>
+          </div>
         </div>
       )}
 
-      <div className="tips-section" style={{ marginTop: '30px' }}>
-        <h4>What is happening?</h4>
-        <ul>
-          <li>🔍 Detecting body landmarks using AI</li>
-          <li>📐 Calculating angles and positions</li>
-          <li>📊 Analyzing technique metrics</li>
-          <li>🎬 Creating annotated video</li>
-          <li>📝 Generating personalized feedback</li>
+      <div style={{
+        background: 'linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%)',
+        borderRadius: '16px',
+        padding: '25px',
+        marginTop: '20px',
+        border: '2px solid #667eea'
+      }}>
+        <h4 style={{ marginBottom: '15px', fontSize: '1.2rem', color: '#333' }}>
+          ⚡ What's happening behind the scenes
+        </h4>
+        <ul style={{ margin: 0, paddingLeft: '25px', lineHeight: '1.9', color: '#555' }}>
+          <li>AI identifies 33 body landmarks in each frame</li>
+          <li>Calculates joint angles, body rotation, and timing</li>
+          <li>Compares your technique against ideal freestyle form</li>
+          <li>Creates an annotated video with visual feedback</li>
+          <li>Generates personalized tips to improve</li>
         </ul>
-        <p style={{ marginTop: '15px', color: '#666' }}>
-          This usually takes 1-3 minutes depending on video length.
-        </p>
+        <div style={{
+          background: 'rgba(255,255,255,0.7)',
+          borderRadius: '8px',
+          padding: '15px',
+          marginTop: '15px',
+          fontSize: '0.95rem',
+          color: '#666'
+        }}>
+          <strong>⏱️ Usually takes:</strong> 30 seconds to 2 minutes (2-3x faster now!)
+        </div>
       </div>
     </div>
   );

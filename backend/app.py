@@ -139,12 +139,20 @@ def get_status(video_id):
 
 @app.route('/api/result/<video_id>/video', methods=['GET'])
 def get_result_video(video_id):
-    """Download analyzed video"""
+    """Stream analyzed video for playback"""
     # Find the file with any extension
     for ext in ALLOWED_EXTENSIONS:
         video_path = os.path.join(app.config['RESULTS_FOLDER'], f'{video_id}_analyzed.{ext}')
         if os.path.exists(video_path):
-            return send_file(video_path, mimetype=f'video/{ext}')
+            # Determine correct mimetype
+            mimetype = 'video/mp4' if ext == 'mp4' else f'video/{ext}'
+            # Use as_attachment=False to allow inline playback
+            return send_file(
+                video_path,
+                mimetype=mimetype,
+                as_attachment=False,
+                download_name=f'{video_id}_analyzed.{ext}'
+            )
 
     return jsonify({'error': 'Video not found'}), 404
 

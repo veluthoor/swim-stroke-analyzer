@@ -179,6 +179,29 @@ Future enhancements planned:
 5. **Swim naturally** - don't change your form for the camera
 6. **Review multiple videos** over time to track improvement
 
+## 🎨 NEW: AI-Powered UI Design Assistant
+
+Use **Gemini AI** to automatically analyze and improve the web interface!
+
+```bash
+# One-time setup
+./setup_design_assistant.sh
+
+# Get AI-powered design recommendations
+python3 design_assistant.py
+```
+
+**What you get:**
+- ✅ Modern color palette suggestions
+- ✅ Component redesign recommendations
+- ✅ Animation and micro-interaction ideas
+- ✅ Accessibility improvements
+- ✅ Production-ready code examples
+
+**Learn more:** See `DESIGN_QUICK_START.md` for the 3-minute guide!
+
+---
+
 ## Technical Details
 
 **Built with:**
@@ -186,6 +209,7 @@ Future enhancements planned:
 - OpenCV for video processing
 - MediaPipe for pose estimation
 - NumPy for calculations
+- Google Gemini AI (optional, for UI design assistance)
 
 **Architecture:**
 - `pose_detector.py` - MediaPipe integration
@@ -193,6 +217,7 @@ Future enhancements planned:
 - `visualizer.py` - Video annotation and overlay
 - `feedback_generator.py` - Report generation
 - `models/freestyle_rules.py` - Swimming technique rules and thresholds
+- `design_assistant.py` - Gemini-powered UI design analyzer (optional)
 
 ## Contributing
 

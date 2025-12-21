@@ -31,9 +31,14 @@ function App() {
   return (
     <div className="App">
       <div className="container">
-        <header className="header">
-          <h1>🏊‍♂️ Swim Stroke Analyzer</h1>
-          <p>AI-powered freestyle technique analysis - Get coaching-quality feedback</p>
+        <header className="header" style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white'
+        }}>
+          <h1 style={{ color: 'white' }}>🏊‍♂️ Swim Stroke Analyzer</h1>
+          <p style={{ color: 'rgba(255,255,255,0.95)', fontSize: '1.15rem' }}>
+            AI-powered freestyle coach in your pocket. Upload, analyze, improve! 🚀
+          </p>
         </header>
 
         {stage === 'upload' && (
