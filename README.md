@@ -421,6 +421,12 @@ MIT License - feel free to use and modify for your swimming improvement journey!
 
 **Charu Veluthoor**
 
-Built with ❤️ for the swimming community. Whether you're training for your first triathlon or chasing a PR, this tool helps you swim smarter, not just harder.
+I built this tool because I've wanted to fix my swim form for ages, but coaches haven't been the most accessible. I've constantly recorded videos and tried sending them around to coaches since I work in the industry, but I realized others don't have this luxury—and how great it would be to have a coach on call, available whenever you need feedback.
 
-*Questions? Feedback? Found a bug? Open an issue or reach out!*
+So I built this for myself and for everyone else on this swimming journey.
+
+This tool is constantly a work in progress and is being continuously reviewed and improved by swimmers and swim coaches. Whether you're training for your first triathlon, working on distance efficiency, or just want to swim better, this is for you.
+
+**All feedback welcome!** Open an issue, suggest improvements, or share your swimming journey. Let's make this better together. 🏊‍♂️
+
+Built with ❤️ for swimmers, by a swimmer.
