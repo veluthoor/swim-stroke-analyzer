@@ -56,9 +56,20 @@ class VideoProcessor:
         # Create output directory if it doesn't exist
         os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else '.', exist_ok=True)
 
-        # Use mp4v codec for MP4 files
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # Use H.264 codec for browser compatibility
+        # Try avc1 first (H.264), fall back to mp4v if not available
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
         writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+        # If avc1 fails, try H264
+        if not writer.isOpened():
+            fourcc = cv2.VideoWriter_fourcc(*'H264')
+            writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+        # Last resort: mp4v (but this won't play in browsers)
+        if not writer.isOpened():
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
         if not writer.isOpened():
             raise ValueError(f"Failed to create video writer: {output_path}")
