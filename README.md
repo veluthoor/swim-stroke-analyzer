@@ -17,11 +17,7 @@ That's what this is. Upload your swim video, get coaching-quality feedback in mi
 I've been listening to feedback from swimmers and coaches, and here's what's improved:
 
 - 🚀 **2-3x Faster Analysis** - Optimized the AI so you're not waiting forever
-- 🎨 **Actually Fun to Use** - No more boring corporate UI. This looks good!
-- 📹 **Video Auto-Plays** - See your analyzed swim immediately, no downloads needed
 - 📊 **Real Insights, Not Data Dumps** - Quick insights, biggest issues, what's working
-- 🎯 **Tell Me What to Fix First** - Prioritized action plan so you know where to start
-- ✅ **Celebrate What's Working** - Because you're doing some things right!
 - 💡 **Shareable Reports** - Perfect for sending to your coach or training partners
 
 ---
