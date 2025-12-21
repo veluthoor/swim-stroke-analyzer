@@ -1,75 +1,107 @@
 # Swim Stroke Analyzer
 
-AI-powered freestyle swimming technique analysis with a modern web interface. Get coaching-quality feedback on your form without a coach.
+**Your AI swimming coach, available 24/7.**
+
+I built this because I've wanted to fix my swim form for ages, but coaches haven't been the most accessible. I've constantly recorded videos and tried sending them around to coaches since I work in the industry, but I realized most swimmers don't have this luxury.
+
+So I asked myself: **What if everyone could have a coach on call, available whenever they need feedback?**
+
+That's what this is. Upload your swim video, get coaching-quality feedback in minutes. No scheduling, no commute to the pool, no waiting for email responses. Just you, your video, and instant analysis.
 
 🎯 **Upload. Analyze. Improve.** It's that simple.
 
-## ✨ What's New
+---
 
-**v2.0 - Major Web UI Overhaul:**
-- 🚀 **2-3x Faster Analysis** - Optimized MediaPipe processing with smart frame skipping
-- 🎨 **Beautiful Web Interface** - Modern, fun, and engaging design
-- 📹 **Auto-Play Video** - Analyzed videos play automatically in the browser
-- 📊 **Smart Results Display** - Quick insights, biggest red flags, and actionable tips
-- 🎯 **Prioritized Action Plans** - Know exactly what to fix first
-- ✅ **Celebrate Strengths** - See what you're doing well, not just problems
-- 💡 **Shareable Reports** - Quick insights perfect for sharing with coaches or teammates
+## ✨ What's New in v2.0
+
+I've been listening to feedback from swimmers and coaches, and here's what's improved:
+
+- 🚀 **2-3x Faster Analysis** - Optimized the AI so you're not waiting forever
+- 🎨 **Actually Fun to Use** - No more boring corporate UI. This looks good!
+- 📹 **Video Auto-Plays** - See your analyzed swim immediately, no downloads needed
+- 📊 **Real Insights, Not Data Dumps** - Quick insights, biggest issues, what's working
+- 🎯 **Tell Me What to Fix First** - Prioritized action plan so you know where to start
+- ✅ **Celebrate What's Working** - Because you're doing some things right!
+- 💡 **Shareable Reports** - Perfect for sending to your coach or training partners
+
+---
+
+## Why This Exists
+
+**The Problem:**
+You want to improve your swimming, but:
+- Coaches are expensive or hard to access
+- You can film yourself, but can't see what you're doing wrong
+- Asking for feedback means waiting days (or never hearing back)
+- You don't know if you're fixing the right things
+
+**The Solution:**
+Upload a video. Get immediate, specific, actionable feedback on:
+- What's costing you the most speed/efficiency
+- Exactly how to fix it
+- What you're doing well (yes, there's good stuff too!)
+- A prioritized plan so you're not overwhelmed
+
+No BS. No jargon. Just "here's what's wrong and here's how to fix it."
+
+---
 
 ## Features
 
-### Core Analysis
-- **Pose Detection**: Uses MediaPipe to track your body position throughout the stroke
-- **Technique Analysis**: Evaluates key metrics including:
-  - Elbow angle during catch phase
-  - Body rotation
-  - Arm entry position
-  - Head stability
-  - Kick mechanics
-  - Stroke rate
-- **Annotated Video**: Visual overlay showing skeleton, angles, and real-time metrics
-- **Coaching Feedback**: Actionable tips prioritized by impact on efficiency
+### The Analysis
+- **Pose Detection** - AI tracks your body position throughout each stroke
+- **Technique Scoring** - Get a 1-10 score (no sugar-coating)
+- **Issue Detection** - Analyzes:
+  - Elbow angle during catch (the #1 efficiency killer)
+  - Body rotation (are you swimming flat?)
+  - Head position (are you lifting to breathe?)
+  - Kick mechanics (knees vs hips)
+  - Stroke rate (tempo optimization)
+- **Annotated Video** - See the skeleton overlay, angles, metrics in real-time
+- **Coaching Tips** - Specific fixes, prioritized by impact
 
-### Web Interface
-- **Drag & Drop Upload** - Just drop your video and go
-- **Real-Time Progress** - Visual step tracker with fun messages
-- **Score Display** - Big, beautiful score card (X/10) with emoji feedback
-- **Smart Parsing** - Automatically extracts and displays:
-  - 📊 Quick Insight - The TL;DR of your swim
-  - 🚨 Biggest Red Flag - Top priority issue with fix
-  - ✅ What's Working - Your strengths
-  - 🎯 Action Plan - Prioritized steps (critical → important)
-- **Auto-Play Video** - See your analyzed swim immediately
-- **Download Option** - Save the annotated video for later review
+### The Interface
+- **Drag & Drop** - Just drop your video and go
+- **Progress Tracking** - Fun messages while you wait (I promise, it's not boring)
+- **Score Display** - Big, beautiful score card with emoji feedback
+- **Smart Results** - Auto-extracts:
+  - 📊 **Quick Insight** - The TL;DR of your swim
+  - 🚨 **Biggest Red Flag** - What's hurting you most + how to fix it
+  - ✅ **What's Working** - Your strengths
+  - 🎯 **Action Plan** - Do this first, then this, then this
+- **Auto-Play Video** - Watch your analyzed swim with overlays
+- **Download Option** - Save it for later
 
-## Installation
+---
 
-### Prerequisites
+## Getting Started
 
-- **Python 3.8+**
-- **Node.js 14+** (for web interface)
-- **npm** or **yarn**
+### What You Need
+- Python 3.8+
+- Node.js 14+ (for the web interface)
+- A video of you swimming (15-60 seconds is perfect)
 
-### Quick Start
+### Installation
 
-1. **Clone the repository:**
+**1. Clone this repo:**
 ```bash
-git clone <repository-url>
+git clone https://github.com/veluthoor/swim-stroke-analyzer.git
 cd swim-stroke-analyzer
 ```
 
-2. **Install Python dependencies:**
+**2. Install Python stuff:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Install frontend dependencies:**
+**3. Install frontend stuff:**
 ```bash
 cd frontend
 npm install
 cd ..
 ```
 
-4. **Start the application:**
+**4. Start it up:**
 
 **Terminal 1 - Backend:**
 ```bash
@@ -83,109 +115,95 @@ cd frontend
 npm start
 ```
 
-5. **Open your browser:**
+**5. Open your browser:**
 ```
 http://localhost:3000
 ```
 
-That's it! 🎉
+**That's it!** 🎉
 
-## Usage
+---
 
-### Web Interface (Recommended)
+## How to Use It
 
-1. **Upload**: Drag and drop your swim video (or click to browse)
-2. **Wait**: Watch the fun progress messages while AI analyzes your technique
-3. **Review**: Get your score, insights, and action plan
-4. **Watch**: Auto-play video shows your analyzed swim with overlays
-5. **Download**: Save the annotated video if you want
-6. **Improve**: Follow the prioritized action plan
-7. **Repeat**: Upload another video to track progress!
+1. **Film yourself swimming** (side view, 15-60 seconds)
+2. **Drop the video** into the web interface
+3. **Wait 1-2 minutes** while AI does its thing
+4. **Get your results:**
+   - Overall score (1-10)
+   - Biggest issue + how to fix it
+   - What you're doing well
+   - Prioritized action plan
+5. **Watch the video** with AI overlays showing angles, form, etc.
+6. **Go practice** and fix the top issue
+7. **Upload again** next week to track progress
 
-### Command Line (Advanced)
+**Pro tip:** Focus on ONE issue at a time. Trying to fix everything at once = fixing nothing.
 
-Analyze a swimming video and get both a text report and annotated video:
+---
 
-```bash
-python main.py path/to/your/video.mp4
-```
+## What Makes a Good Video?
 
-This will generate:
-- `path/to/your/video_analyzed.mp4` - Annotated video with pose overlay
-- `path/to/your/video_analyzed_report.txt` - Detailed text report
+✅ **Do this:**
+- Film from the **side** (pool deck level)
+- Use good **lighting** (outdoor pools in daylight = perfect)
+- Keep the camera **steady** (tripod helps)
+- Show **full body** when possible
+- Capture **2-3 complete strokes**
+- Swim **naturally** (don't change your form for the camera)
 
-**Options:**
+❌ **Avoid:**
+- Filming from above or underwater (coming soon!)
+- Shaky camera work
+- Poor lighting
+- Videos shorter than 10 seconds
 
-**Custom output path:**
-```bash
-python main.py video.mp4 -o output/analysis.mp4
-```
+**Formats:** MP4, AVI, MOV (max 500MB)
 
-**Report only (skip video generation):**
-```bash
-python main.py video.mp4 --report-only
-```
-
-**Video only (skip text report):**
-```bash
-python main.py video.mp4 --no-report
-```
-
-### Video Requirements
-
-For best results, your video should:
-- ✅ Show **side view** of the swimmer (above water)
-- ✅ Have **good lighting**
-- ✅ Be **stable** (not shaky - use a tripod!)
-- ✅ Show at least **2-3 complete stroke cycles**
-- ✅ Capture the **full body** when possible
-- ✅ Be **15-60 seconds** long (sweet spot for analysis)
-
-**Supported formats:** MP4, AVI, MOV
-
-**Tips:**
-- Film at pool deck level, not from above
-- Outdoor pools in daylight work great
-- Keep the swimmer in frame throughout
-- Swim naturally - don't change your form for the camera
+---
 
 ## Understanding Your Results
 
-### Your Score
+### Your Score (1-10)
 
-You'll get an overall technique score from **1-10**:
-- **9-10** 🏆 Olympic-level! Maintain consistency
-- **7-8** 🎯 Solid technique! A few tweaks away from pro
-- **5-6** 👍 Getting there! Clear areas to improve
-- **1-4** 💪 Room to improve! Follow the action plan
+- **9-10** 🏆 Olympic-level! Keep it consistent
+- **7-8** 🎯 Solid form, minor tweaks needed
+- **5-6** 👍 Good foundation, clear areas to improve
+- **1-4** 💪 Lots of room to grow (that's okay!)
 
 ### Quick Insight
 
-A shareable one-liner about your swim. Examples:
-- *"Solid foundation, but you're losing speed due to dropped elbow. Fix that and you'll see big gains!"*
-- *"Your technique is Olympic-level! Maintain this form and focus on consistency."*
+One sentence that sums up your swim. Examples:
 
-### Biggest Red Flag
+> *"Solid foundation, but you're losing speed due to dropped elbow. Fix that and you'll see big gains!"*
 
-If you have critical issues, this highlights the #1 problem costing you the most speed/efficiency, plus exactly how to fix it.
+> *"Your technique is Olympic-level! Maintain this form and focus on consistency."*
 
-### What's Working
+### Biggest Red Flag 🚨
 
-We don't just point out problems! This section celebrates your strengths:
+If you have critical issues, this highlights **the #1 thing** costing you speed/efficiency, plus exactly how to fix it.
+
+**Why just one?** Because trying to fix 5 things at once means you fix nothing. Master one thing, then move to the next.
+
+### What's Working ✅
+
+You're not doing everything wrong! This celebrates your strengths:
 - Great elbow catch angle
 - Excellent body rotation
 - Solid head position
 - Optimal stroke rate
 
-### Action Plan
+**Why this matters:** Knowing what's working helps you not accidentally break it while fixing other stuff.
 
-Prioritized list of fixes:
-1. **🚨 FIX THIS FIRST** - Critical issues (lose 2 points each)
-2. **⚠️ IMPORTANT** - Moderate issues (lose 1 point each)
+### Action Plan 🎯
 
-Each item includes:
-- Clear description of the problem
-- Specific fix instructions
+Prioritized list:
+1. **🚨 FIX THIS FIRST** - Critical issues (each costs you 2 points)
+2. **⚠️ IMPORTANT** - Moderate issues (each costs you 1 point)
+
+Each includes:
+- What's wrong
+- How to fix it
 - Why it matters
 
 ### Sample Report
@@ -198,8 +216,8 @@ Overall Technique Score: 7/10
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📊 QUICK INSIGHT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💪 Solid foundation, but you're losing speed/efficiency due to:
-dropped elbow. Fix that and you'll see big gains!
+💪 Solid foundation, but you're losing speed due to dropped
+elbow. Fix that and you'll see big gains!
 
 🚨 BIGGEST RED FLAG
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -207,6 +225,7 @@ dropped elbow. Fix that and you'll see big gains!
 
 💡 HOW TO FIX IT:
    Focus on high elbow catch. Imagine reaching over a barrel.
+   Practice this drill: Catch-up drill focusing on elbow position.
 
 ✅ WHAT'S WORKING
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -224,209 +243,228 @@ Focus on these in order:
    → Rotate head to breathe, don't lift. Keep one eye in water.
 ```
 
-### Metrics Explained
+---
 
-**Elbow Angle (80-100° optimal)**
-- Measured at the catch phase (when hand enters water and begins pull)
-- Lower angle = better "high elbow catch" = more efficient pull
-- >120° indicates "dropped elbow" - common efficiency killer
+## The Metrics Explained (Without the Jargon)
 
-**Body Rotation (45-60° optimal)**
-- How much you roll from side to side
-- Proper rotation reduces drag and improves power
-- Too flat (<30°) or over-rotating (>70°) both reduce efficiency
+**Elbow Angle (80-100° is optimal)**
+- Measured when your hand enters and begins the pull
+- Lower angle = "high elbow catch" = more power, less drag
+- >120° = "dropped elbow" = you're pushing water down instead of back
+- **Fix:** Imagine reaching over a barrel during the catch
 
-**Stroke Rate (50-60 SPM optimal for distance)**
-- Strokes per minute
-- Balance between tempo and distance per stroke
-- Sprinting uses higher rates, distance uses lower rates with longer glide
+**Body Rotation (45-60° is optimal)**
+- How much you roll side-to-side
+- Proper rotation = less drag + more power from your core
+- Swimming flat (<30°) or over-rotating (>70°) both slow you down
+- **Fix:** Rotate from the hips, not the shoulders
 
-**Head Stability**
-- Measures vertical head movement
-- Should rotate (not lift) to breathe
-- Lower movement = better streamlining
+**Stroke Rate (50-60 SPM for distance)**
+- How many strokes per minute
+- Higher rate = sprinting, lower rate = distance/efficiency
+- Sweet spot depends on your goals
+- **Fix:** Film yourself counting strokes, then adjust tempo
 
-**Kick Mechanics**
-- Knee angle should be near 170° (almost straight)
-- Kick from hips, not knees
-- Excessive bend creates drag
+**Head Position**
+- Should rotate with your body to breathe (not lift)
+- Lifting = drag + messed up body position
+- **Fix:** Keep one goggle in the water when breathing
 
-## Performance
+**Kick**
+- Should come from hips with nearly straight legs (170° knee angle)
+- Kicking from knees = drag + wasted energy
+- **Fix:** Think "loose ankles, straight legs" from the hip
 
-**Analysis Speed:**
-- 15-second video: ~1-2 minutes
-- 30-second video: ~2-3 minutes
-- 60-second video: ~4-6 minutes
+---
 
-**Optimization features:**
-- Smart frame skipping (analyzes every 2nd frame)
-- Balanced MediaPipe model (complexity=1)
-- Efficient video codec (H.264 for browser compatibility)
-- Background processing with real-time progress updates
+## Performance (How Long Does This Take?)
 
-## How It Works
+- **15-second video:** ~1-2 minutes
+- **30-second video:** ~2-3 minutes
+- **60-second video:** ~4-6 minutes
 
-### Analysis Pipeline
+**Why so fast?** Smart optimizations:
+- Frame skipping (analyzes every 2nd frame)
+- Optimized AI model
+- Efficient video codec
 
-1. **Upload** → Video sent to Flask backend
-2. **Pose Detection** → MediaPipe analyzes each frame to identify 33 body landmarks
-3. **Metric Calculation** → Computes angles, positions, and movements throughout the stroke
-4. **Issue Detection** → Compares metrics against optimal ranges based on swimming biomechanics
-5. **Feedback Generation** → Creates prioritized, actionable coaching tips
-6. **Visualization** → Overlays skeleton and annotations on the original video
-7. **Results Display** → React frontend shows beautiful, interactive results
+---
 
-### Tech Stack
+## How It Actually Works
 
-**Backend:**
-- Python 3.8+ with Flask
-- OpenCV for video processing (H.264 codec)
-- MediaPipe for pose estimation
-- NumPy for calculations
+**Behind the scenes:**
 
-**Frontend:**
-- React 18
-- Modern CSS with gradients and animations
-- Responsive design
-- Video auto-play with browser compatibility
+1. **Upload** → Video goes to the backend
+2. **Pose Detection** → AI (MediaPipe) identifies 33 body points per frame
+3. **Metric Calculation** → Computes angles, positions, movement patterns
+4. **Issue Detection** → Compares your metrics to optimal ranges
+5. **Feedback Generation** → Creates prioritized, actionable tips
+6. **Video Creation** → Overlays skeleton, angles, metrics on your video
+7. **Results Display** → Frontend shows it beautifully
 
-**Architecture:**
-```
-backend/
-  app.py                    - Flask REST API
-src/
-  pose_detector.py          - MediaPipe integration (optimized)
-  stroke_analyzer.py        - Metric calculation and issue detection
-  visualizer.py             - Video annotation and overlay
-  feedback_generator.py     - Report generation (engaging format)
-  models/freestyle_rules.py - Swimming technique rules
-frontend/
-  src/
-    App.js                  - Main app with gradient header
-    components/
-      UploadComponent.js    - Drag & drop upload
-      ProcessingComponent.js - Fun progress tracking
-      ResultsComponent.js   - Beautiful results display
-```
+**Tech stack:**
+- **Backend:** Python, Flask, OpenCV, MediaPipe
+- **Frontend:** React, modern CSS
+- **Video:** H.264 codec (browser-compatible)
 
-## API Endpoints
+---
+
+## Limitations (Being Honest Here)
+
+- **Camera angle:** Currently works best with side view above water. Underwater/front view coming soon.
+- **Single swimmer:** Works best when you're the only person clearly visible
+- **2D analysis:** Body rotation estimates are approximations (3D would need multiple cameras)
+- **Not perfect:** Stroke counting is simplified, may not be 100% accurate
+- **Not a replacement for coaching:** This gives you data and direction. A real coach is still invaluable for personalized feedback and accountability.
+
+---
+
+## Troubleshooting
+
+**Video won't upload?**
+- Check file size (max 500MB)
+- Make sure it's MP4, AVI, or MOV
+- Try a shorter clip (15-60 seconds)
+
+**Processing taking forever?**
+- Shorter videos = faster processing
+- Normal: 1-2 minutes for 15 seconds
+- Check backend terminal for errors
+
+**Video won't play in browser?**
+- This should be fixed in v2.0 (H.264 codec)
+- Try downloading it instead
+- Check browser console for errors
+
+**Results seem off?**
+- Make sure the camera angle is from the side
+- Check that lighting is good
+- Ensure you're clearly visible throughout
+- Try filming a different angle
+
+---
+
+## Roadmap (What's Coming)
+
+**Soon:**
+- [ ] Stroke-by-stroke breakdown
+- [ ] Compare your video side-by-side with pros
+- [ ] Mobile-friendly design
+- [ ] Save your results (currently in-memory only)
+- [ ] Track progress over time
+
+**Eventually:**
+- [ ] Underwater footage support
+- [ ] Multiple camera angles
+- [ ] Other strokes (backstroke, breaststroke, butterfly)
+- [ ] Mobile app
+- [ ] Social features (share with coaches/teammates)
+- [ ] Challenges and leaderboards
+
+---
+
+## Want to Help?
+
+This tool is constantly being reviewed and improved by swimmers and swim coaches. **All feedback welcome!**
+
+**Ways to contribute:**
+- 🐛 Found a bug? Open an issue
+- 💡 Have an idea? Suggest it
+- 🏊‍♂️ Are you a swim coach? I'd love your input on the analysis
+- 💻 Want to code? PRs welcome
+- 📹 Got interesting test videos? Share them
+
+**Areas that need work:**
+- Better stroke cycle detection
+- 3D position estimation
+- More coaching knowledge
+- Support for other strokes
+- Mobile app
+
+---
+
+## API Endpoints (For Developers)
 
 **`POST /api/upload`**
-- Upload video for analysis
-- Returns: `video_id` for tracking
+- Upload video
+- Returns: `video_id`
 
 **`GET /api/status/:video_id`**
-- Check processing status
+- Check progress
 - Returns: `status`, `progress`, `message`
 
 **`GET /api/result/:video_id/video`**
-- Stream analyzed video (H.264)
-- Returns: MP4 video with pose overlays
+- Stream analyzed video
+- Returns: MP4 with overlays
 
 **`GET /api/result/:video_id/report`**
 - Get text report
-- Returns: JSON with full report text
+- Returns: JSON with full analysis
 
 **`GET /api/health`**
 - Health check
 - Returns: `{status: 'ok'}`
 
-## Limitations
+---
 
-- **Camera Angle**: Currently optimized for side view (above water). Underwater or front views may give less accurate results.
-- **Single Swimmer**: Works best with one swimmer clearly visible in frame
-- **2D Analysis**: Body rotation and depth metrics are approximations from single camera angle
-- **Stroke Detection**: Stroke counting is simplified and may not be 100% accurate
-- **Not a Replacement for Coaching**: This tool provides data and suggestions, but working with a real coach is invaluable for personalized feedback
+## Command Line Usage (For the Nerds)
 
-## Troubleshooting
+If you prefer terminal over web interface:
 
-**Video won't upload:**
-- Check file size (max 500MB)
-- Ensure format is MP4, AVI, or MOV
-- Try a shorter video (15-60 seconds is ideal)
+```bash
+# Basic analysis
+python main.py path/to/video.mp4
 
-**Processing stuck:**
-- Check backend terminal for errors
-- Ensure MediaPipe is installed correctly
-- Try restarting both backend and frontend
+# Custom output path
+python main.py video.mp4 -o output/analysis.mp4
 
-**Video won't play in browser:**
-- This should be fixed in v2.0 (H.264 codec)
-- If issues persist, try downloading the video
-- Check browser console for errors
+# Report only (skip video)
+python main.py video.mp4 --report-only
 
-**Analysis taking too long:**
-- Shorter videos process faster
-- Check your system resources
-- Normal: 1-2 minutes for 15-second video
+# Video only (skip report)
+python main.py video.mp4 --no-report
+```
 
-## Roadmap
-
-**Near-term:**
-- [ ] Stroke-by-stroke breakdown
-- [ ] Side-by-side comparison with reference videos
-- [ ] Mobile-responsive design improvements
-- [ ] Persistent storage for results (currently in-memory)
-- [ ] User accounts and progress tracking
-
-**Future enhancements:**
-- [ ] Support for underwater footage
-- [ ] Multiple camera angle fusion
-- [ ] Training progress tracking over time
-- [ ] Support for other strokes (backstroke, breaststroke, butterfly)
-- [ ] Mobile app version
-- [ ] Real-time analysis during swim practice
-- [ ] Social sharing features
-- [ ] Leaderboards and challenges
-
-## Contributing
-
-This project is actively being improved! Feedback, issues, and contributions welcome.
-
-**Areas that could use help:**
-- Better stroke cycle detection algorithms
-- More sophisticated 3D position estimation
-- Expanded coaching knowledge base
-- Support for additional camera angles
-- Mobile app development
-- UI/UX improvements
+---
 
 ## License
 
-MIT License - feel free to use and modify for your swimming improvement journey!
+MIT License - Use it, modify it, improve it. Just give credit where it's due.
+
+---
 
 ## Acknowledgments
 
-**Swimming technique guidelines based on:**
+**Swimming knowledge from:**
 - Total Immersion Swimming
-- USA Swimming technical resources
-- Olympic swimming biomechanics research
+- USA Swimming
+- Olympic biomechanics research
+- Countless coaches and swimmers who've given feedback
 
-**Technology:**
-- MediaPipe by Google
+**Tech powered by:**
+- MediaPipe (Google)
 - OpenCV
 - React
 - Flask
 
 ---
 
-**Built for swimmers, by swimmers. Train smarter, swim faster.** 🏊‍♂️💨
-
-**Try it now:** Upload a video and get coaching-quality feedback in minutes!
-
----
-
-## Author
+## About Me
 
 **Charu Veluthoor**
 
-I built this tool because I've wanted to fix my swim form for ages, but coaches haven't been the most accessible. I've constantly recorded videos and tried sending them around to coaches since I work in the industry, but I realized others don't have this luxury—and how great it would be to have a coach on call, available whenever you need feedback.
+I'm a swimmer who got tired of not having access to quality coaching feedback. I work in tech and have some industry connections, so I could send videos to coaches—but most people can't do that. It didn't seem fair.
 
-So I built this for myself and for everyone else on this swimming journey.
+So I built this. For me, and for you, and for everyone else trying to get better at swimming without breaking the bank or waiting weeks for feedback.
 
-This tool is constantly a work in progress and is being continuously reviewed and improved by swimmers and swim coaches. Whether you're training for your first triathlon, working on distance efficiency, or just want to swim better, this is for you.
+This is a living project. Swimmers and coaches are constantly reviewing it, suggesting improvements, and helping make it better. It's not perfect, but it's getting better every day.
 
-**All feedback welcome!** Open an issue, suggest improvements, or share your swimming journey. Let's make this better together. 🏊‍♂️
+**Let's improve together.** Whether you're training for your first triathlon, working on distance efficiency, or just want to swim better—this is for you.
 
-Built with ❤️ for swimmers, by a swimmer.
+Open an issue, share your story, send feedback. Let's make swimming more accessible for everyone. 🏊‍♂️
+
+---
+
+**Built with ❤️ for swimmers, by a swimmer.**
+
+**Try it now:** Upload a video and get coaching-quality feedback in minutes!
