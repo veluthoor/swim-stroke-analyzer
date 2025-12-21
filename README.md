@@ -322,11 +322,6 @@ Focus on these in order:
 - Normal: 1-2 minutes for 15 seconds
 - Check backend terminal for errors
 
-**Video won't play in browser?**
-- This should be fixed in v2.0 (H.264 codec)
-- Try downloading it instead
-- Check browser console for errors
-
 **Results seem off?**
 - Make sure the camera angle is from the side
 - Check that lighting is good
