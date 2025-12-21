@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python310", "gcc", "cmake"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "cd backend && gunicorn --bind 0.0.0.0:$PORT app:app --timeout 300 --workers 2"

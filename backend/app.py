@@ -14,7 +14,11 @@ from src.visualizer import Visualizer
 from src.feedback_generator import FeedbackGenerator
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for React frontend
+
+# Enable CORS for React frontend
+# Allow all origins in development, specific origin in production
+allowed_origins = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+CORS(app, origins=[allowed_origins, 'http://localhost:3000'])
 
 # Configuration
 UPLOAD_FOLDER = 'backend/uploads'

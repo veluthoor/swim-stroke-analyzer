@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
-
-const API_BASE_URL = 'http://localhost:5001/api';
+import { API_BASE_URL } from '../config';
 
 function UploadComponent({ onFileSelected, onUploadComplete, selectedFile }) {
   const [dragging, setDragging] = useState(false);
