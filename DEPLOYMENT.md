@@ -130,6 +130,7 @@ If you prefer to keep everything on Railway:
   - Missing dependencies → Check `requirements.txt`
   - Wrong Python version → Should be 3.10 (set in `nixpacks.toml`)
   - Port binding → Make sure `Procfile` uses `$PORT`
+  - `libGL.so.1` error → Fixed by using `opencv-python-headless` in requirements.txt
 
 ### Frontend can't connect to backend
 - Verify `REACT_APP_API_URL` is set correctly in Vercel/Railway
