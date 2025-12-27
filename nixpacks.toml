@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python310", "gcc", "cmake", "libGL", "glib", "libgcc"]
+nixPkgs = ["python310", "gcc", "cmake", "libGL", "glib", "libgcc", "mesa"]
 
 [phases.install]
 cmds = [
@@ -9,4 +9,4 @@ cmds = [
 ]
 
 [start]
-cmd = "cd backend && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT app:app --timeout 300 --workers 2"
+cmd = "export LD_LIBRARY_PATH=/nix/store/*-mesa-*/lib:/nix/store/*-libglvnd-*/lib:$LD_LIBRARY_PATH && cd backend && /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT app:app --timeout 300 --workers 2"
