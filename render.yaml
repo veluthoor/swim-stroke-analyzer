@@ -1,0 +1,36 @@
+services:
+  # Backend API
+  - type: web
+    name: swim-analyzer-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT app:app --timeout 300 --workers 2
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: FLASK_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false
+    healthCheckPath: /api/health
+
+  # Frontend
+  - type: web
+    name: swim-analyzer-frontend
+    env: static
+    region: oregon
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
