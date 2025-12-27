@@ -2,7 +2,7 @@
 nixPkgs = ["python310", "python310Packages.pip", "gcc", "cmake", "libGL", "glib", "libgcc"]
 
 [phases.install]
-cmds = ["pip install --break-system-packages --upgrade pip", "pip install --break-system-packages -r requirements.txt"]
+cmds = ["python3 -m pip install --break-system-packages --upgrade pip", "python3 -m pip install --break-system-packages -r requirements.txt"]
 
 [start]
 cmd = "cd backend && gunicorn --bind 0.0.0.0:$PORT app:app --timeout 300 --workers 2"
