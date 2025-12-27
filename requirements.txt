@@ -1,9 +1,10 @@
 opencv-python-headless>=4.8.0
-mediapipe>=0.10.0
-numpy>=1.24.0
+mediapipe==0.10.9
+numpy>=1.24.0,<2.0.0
 flask>=2.3.0
 flask-cors>=4.0.0
 gunicorn>=21.2.0
+protobuf<4,>=3.11
 
 # UI Design Assistant (optional)
 google-generativeai>=0.3.0
