@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxext6 \
     libxrender1 \
     libgomp1 \
-    libgl1-mesa-glx \
+    libgl1 \
     # ffmpeg for H.264 re-encoding (browser compatibility)
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
