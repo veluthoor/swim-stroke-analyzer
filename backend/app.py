@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 IS_PRODUCTION = os.getenv('FLASK_ENV', 'development') == 'production'
-FRONTEND_URL = os.getenv('FRONTEND_URL', '')
+FRONTEND_URL = os.getenv('FRONTEND_URL', '').rstrip('/')
 
 if IS_PRODUCTION and FRONTEND_URL:
     allowed_origins = [FRONTEND_URL]
