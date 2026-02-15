@@ -35,8 +35,11 @@ class Visualizer:
         """
         Create annotated video with pose overlay and metrics.
 
+        Frames are re-read directly from the original video (pose_data no longer
+        stores frames) to avoid memory exhaustion on long videos.
+
         Args:
-            pose_data: List of frame data with pose information
+            pose_data: List of frame data with pose information (no 'frame' key)
             output_path: Path to save annotated video
             analysis_results: Results from stroke analyzer
             original_video_path: Path to original video for metadata
@@ -47,8 +50,12 @@ class Visualizer:
         if not pose_data:
             raise ValueError("No pose data to visualize")
 
+        # Build a fast lookup: frame_number -> pose
+        pose_lookup = {fd['frame_number']: fd['pose'] for fd in pose_data}
+
         # Get video properties
         video_info = VideoProcessor(original_video_path).get_video_info()
+        total_frames = video_info['frame_count']
 
         # Create video writer
         writer = VideoProcessor.create_video_writer(
@@ -58,13 +65,24 @@ class Visualizer:
             video_info['height']
         )
 
+        # Re-open original video for frame-by-frame reading
+        cap = cv2.VideoCapture(original_video_path)
+
         print(f"\nCreating annotated video...")
         print(f"Output: {output_path}")
 
-        frame_count = 0
-        for frame_data in pose_data:
-            frame = frame_data['frame'].copy()
-            pose = frame_data['pose']
+        frame_idx = 0
+        last_pose = None  # Forward-fill pose on frames that were skipped during analysis
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Use analyzed pose for this frame, or forward-fill from last known pose
+            if frame_idx in pose_lookup:
+                last_pose = pose_lookup[frame_idx]
+            pose = last_pose
 
             # Draw pose if detected
             if pose is not None:
@@ -72,14 +90,15 @@ class Visualizer:
                 frame = self._draw_metrics_overlay(frame, pose, analysis_results)
 
             # Draw overall stats in corner
-            frame = self._draw_stats_panel(frame, analysis_results, frame_count, len(pose_data))
+            frame = self._draw_stats_panel(frame, analysis_results, frame_idx, total_frames)
 
             writer.write(frame)
-            frame_count += 1
+            frame_idx += 1
 
-            if frame_count % 30 == 0:
-                print(f"Rendered {frame_count}/{len(pose_data)} frames")
+            if frame_idx % 30 == 0:
+                print(f"Rendered {frame_idx}/{total_frames} frames")
 
+        cap.release()
         writer.release()
         print(f"Completed: {output_path}")
 

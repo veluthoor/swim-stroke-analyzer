@@ -112,8 +112,8 @@ Examples:
             print(report)
             print("")
 
-            # Save report to file
-            report_path = args.output.replace('.mp4', '_report.txt')
+            # Save report to file — use splitext so any extension works
+            report_path = os.path.splitext(args.output)[0] + '_report.txt'
             with open(report_path, 'w') as f:
                 f.write(report)
             print(f"Report saved to: {report_path}")
@@ -133,6 +133,12 @@ Examples:
                 args.video
             )
             print(f"✓ Video saved to: {output_video}")
+
+            # Best-effort H.264 re-encode for browser playback
+            if VideoProcessor.reencode_for_browser(output_video):
+                print("✓ Re-encoded to H.264 for browser compatibility")
+            else:
+                print("  (ffmpeg not found — skipping browser re-encode)")
             print("")
         else:
             print("Step 4/4: Skipping video generation")

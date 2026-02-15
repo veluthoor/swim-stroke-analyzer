@@ -1,5 +1,12 @@
+# Railway: use the Dockerfile instead of nixpacks to get ffmpeg + libGL reliably.
+# In the Railway dashboard set: Settings → Build → Builder → Dockerfile
+# and point it at ./Dockerfile.
+#
+# The config below is kept as a fallback only. The fragile mesa path grep
+# has been replaced with a proper apt install in the Dockerfile.
+
 [phases.setup]
-nixPkgs = ["python310", "gcc", "cmake", "glib", "libgcc", "mesa", "libglvnd"]
+nixPkgs = ["python310", "gcc", "cmake", "glib", "libgcc", "mesa", "libglvnd", "ffmpeg"]
 
 [phases.install]
 cmds = [
@@ -9,4 +16,4 @@ cmds = [
 ]
 
 [start]
-cmd = "cd backend && LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/nix/store/$(ls /nix/store | grep mesa | head -1)/lib /opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT app:app --timeout 300 --workers 2"
+cmd = "/opt/venv/bin/gunicorn --bind 0.0.0.0:$PORT --timeout 600 --workers 1 --threads 4 --worker-class gthread backend.app:app"

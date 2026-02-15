@@ -1,19 +1,16 @@
 services:
-  # Backend API
+  # Backend API — built from Dockerfile (includes ffmpeg + libGL, no Nix hacks needed)
   - type: web
     name: swim-analyzer-backend
-    env: python
+    env: docker
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT app:app --timeout 300 --workers 2
+    dockerfilePath: ./Dockerfile
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.0
       - key: FLASK_ENV
         value: production
       - key: FRONTEND_URL
-        sync: false
+        sync: false  # Set this manually in Render dashboard to your frontend URL
     healthCheckPath: /api/health
 
   # Frontend

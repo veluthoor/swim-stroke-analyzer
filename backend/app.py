@@ -1,182 +1,305 @@
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
+import logging
 import os
 import sys
-from werkzeug.utils import secure_filename
-import uuid
 import threading
+import time
+import uuid
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 
-# Add parent directory to path to import analyzer modules
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from flask import Flask, jsonify, request, send_file
+from flask_cors import CORS
+from werkzeug.utils import secure_filename
+
+# ---------------------------------------------------------------------------
+# Path setup — allow imports from the project root
+# ---------------------------------------------------------------------------
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(ROOT)
+
+from src.feedback_generator import FeedbackGenerator
 from src.pose_detector import PoseDetector
 from src.stroke_analyzer import StrokeAnalyzer
+from src.video_processor import VideoProcessor
 from src.visualizer import Visualizer
-from src.feedback_generator import FeedbackGenerator
 
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# App & CORS
+# ---------------------------------------------------------------------------
 app = Flask(__name__)
 
-# Enable CORS for React frontend
-# Allow all origins in development, specific origin in production
-allowed_origins = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-CORS(app, origins=[allowed_origins, 'http://localhost:3000'])
+IS_PRODUCTION = os.getenv('FLASK_ENV', 'development') == 'production'
+FRONTEND_URL = os.getenv('FRONTEND_URL', '')
 
+if IS_PRODUCTION and FRONTEND_URL:
+    allowed_origins = [FRONTEND_URL]
+    logger.info(f"CORS: production mode, allowing origin: {FRONTEND_URL}")
+else:
+    # Development: allow both localhost variants
+    allowed_origins = ['http://localhost:3000', 'http://127.0.0.1:3000']
+    logger.info("CORS: development mode, allowing localhost:3000")
+
+CORS(app, origins=allowed_origins)
+
+# ---------------------------------------------------------------------------
 # Configuration
-UPLOAD_FOLDER = 'backend/uploads'
-RESULTS_FOLDER = 'backend/results'
+# ---------------------------------------------------------------------------
+UPLOAD_FOLDER = os.path.join(ROOT, 'backend', 'uploads')
+RESULTS_FOLDER = os.path.join(ROOT, 'backend', 'results')
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov'}
-MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
+MAX_FILE_SIZE = 200 * 1024 * 1024   # 200 MB — keeps memory & processing time sane
+MAX_WORKERS = 3                      # Max concurrent video analyses
+FILE_TTL_HOURS = 24                  # Auto-delete files older than this
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
-# Ensure directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULTS_FOLDER, exist_ok=True)
 
-# Store processing status
-processing_status = {}
+# ---------------------------------------------------------------------------
+# Thread-safe job status store
+# ---------------------------------------------------------------------------
+processing_status: dict = {}
+status_lock = threading.Lock()
 
-def allowed_file(filename):
+
+def _set_status(video_id: str, **kwargs):
+    with status_lock:
+        if video_id in processing_status:
+            processing_status[video_id].update(kwargs)
+
+
+def _get_status(video_id: str) -> dict:
+    with status_lock:
+        return dict(processing_status.get(video_id, {}))
+
+
+# ---------------------------------------------------------------------------
+# Thread pool — limits concurrent analyses to MAX_WORKERS
+# ---------------------------------------------------------------------------
+executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+
+# ---------------------------------------------------------------------------
+# Simple in-memory rate limiter (per IP, sliding window)
+# ---------------------------------------------------------------------------
+_request_log: dict = defaultdict(list)
+_rate_lock = threading.Lock()
+RATE_LIMIT_REQUESTS = 10   # max uploads per IP
+RATE_LIMIT_WINDOW = 3600   # …within this many seconds (1 hour)
+
+
+def _is_rate_limited(ip: str) -> bool:
+    now = time.time()
+    with _rate_lock:
+        # Purge expired entries
+        _request_log[ip] = [t for t in _request_log[ip] if now - t < RATE_LIMIT_WINDOW]
+        if len(_request_log[ip]) >= RATE_LIMIT_REQUESTS:
+            return True
+        _request_log[ip].append(now)
+        return False
+
+
+# ---------------------------------------------------------------------------
+# File helpers
+# ---------------------------------------------------------------------------
+def _allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def process_video(video_id, input_path, output_path, report_path):
-    """Process video in background thread"""
-    try:
-        processing_status[video_id]['status'] = 'processing'
-        processing_status[video_id]['progress'] = 10
 
-        # Initialize components
+def _validate_video_magic(file_path: str) -> bool:
+    """
+    Check magic bytes to confirm the file is actually a video container,
+    not an executable disguised with a .mp4 extension.
+    """
+    try:
+        with open(file_path, 'rb') as fh:
+            header = fh.read(12)
+        # MP4 / MOV: bytes 4–7 are an ISOM box type
+        if header[4:8] in (b'ftyp', b'moov', b'mdat', b'wide', b'free'):
+            return True
+        # AVI: RIFF....AVI
+        if header[:4] == b'RIFF' and header[8:12] == b'AVI ':
+            return True
+        return False
+    except Exception:
+        return False
+
+
+def _cleanup_old_files():
+    """Delete upload/result files older than FILE_TTL_HOURS."""
+    cutoff = time.time() - FILE_TTL_HOURS * 3600
+    for folder in (UPLOAD_FOLDER, RESULTS_FOLDER):
+        try:
+            for name in os.listdir(folder):
+                path = os.path.join(folder, name)
+                try:
+                    if os.path.isfile(path) and os.path.getmtime(path) < cutoff:
+                        os.remove(path)
+                        logger.info(f"Cleaned up expired file: {path}")
+                except OSError as exc:
+                    logger.warning(f"Could not remove {path}: {exc}")
+        except OSError as exc:
+            logger.warning(f"Could not list {folder}: {exc}")
+
+
+# Run cleanup once at startup
+_cleanup_old_files()
+
+
+# ---------------------------------------------------------------------------
+# Video processing (runs in thread pool worker)
+# ---------------------------------------------------------------------------
+def _process_video(video_id: str, input_path: str, output_path: str, report_path: str):
+    """Full analysis pipeline executed in a pool worker thread."""
+    try:
+        _set_status(video_id, status='processing', progress=10,
+                    message='Detecting poses...')
+
         pose_detector = PoseDetector()
         stroke_analyzer = StrokeAnalyzer()
         visualizer = Visualizer()
         feedback_generator = FeedbackGenerator()
 
-        processing_status[video_id]['progress'] = 20
-        processing_status[video_id]['message'] = 'Analyzing video...'
-
-        # Detect poses
         poses = pose_detector.process_video(input_path)
-        processing_status[video_id]['progress'] = 50
+        _set_status(video_id, progress=50, message='Analyzing stroke mechanics...')
 
-        # Analyze stroke
         analysis = stroke_analyzer.analyze_video(poses)
-        processing_status[video_id]['progress'] = 70
-        processing_status[video_id]['message'] = 'Generating annotated video...'
+        _set_status(video_id, progress=65, message='Generating annotated video...')
 
-        # Create annotated video
         visualizer.create_annotated_video(poses, output_path, analysis, input_path)
-        processing_status[video_id]['progress'] = 90
+        _set_status(video_id, progress=85, message='Re-encoding for browser...')
 
-        # Generate report
+        # Best-effort ffmpeg re-encode; non-fatal if ffmpeg is absent
+        reencoded = VideoProcessor.reencode_for_browser(output_path)
+        if not reencoded:
+            logger.warning(f"[{video_id}] ffmpeg re-encode skipped — video may not play in all browsers")
+
+        _set_status(video_id, progress=92, message='Generating report...')
+
         report = feedback_generator.generate_report(analysis)
-        with open(report_path, 'w') as f:
-            f.write(report)
+        with open(report_path, 'w') as fh:
+            fh.write(report)
 
-        processing_status[video_id]['status'] = 'completed'
-        processing_status[video_id]['progress'] = 100
-        processing_status[video_id]['message'] = 'Analysis complete!'
+        _set_status(video_id, status='completed', progress=100,
+                    message='Analysis complete!')
+        logger.info(f"[{video_id}] Analysis completed successfully")
 
-    except Exception as e:
+    except Exception as exc:
         import traceback
-        processing_status[video_id]['status'] = 'failed'
-        processing_status[video_id]['error'] = str(e)
-        print(f"\n{'='*60}")
-        print(f"ERROR processing video {video_id}:")
-        print(f"{'='*60}")
-        print(traceback.format_exc())
-        print(f"{'='*60}\n")
+        logger.error(f"[{video_id}] Analysis failed:\n{traceback.format_exc()}")
+        _set_status(video_id, status='failed', error=str(exc))
+    finally:
+        # Clean up the raw upload to save disk space
+        try:
+            if os.path.exists(input_path):
+                os.remove(input_path)
+        except OSError:
+            pass
 
+
+# ---------------------------------------------------------------------------
+# Routes
+# ---------------------------------------------------------------------------
 @app.route('/api/upload', methods=['POST'])
 def upload_video():
-    """Handle video upload"""
+    """Accept a video upload and queue it for analysis."""
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+
+    if _is_rate_limited(client_ip):
+        logger.warning(f"Rate limit exceeded for {client_ip}")
+        return jsonify({'error': 'Too many uploads. Please try again later.'}), 429
+
     if 'video' not in request.files:
         return jsonify({'error': 'No video file provided'}), 400
 
     file = request.files['video']
+    if not file.filename:
+        return jsonify({'error': 'No file selected'}), 400
 
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
-    if not allowed_file(file.filename):
+    if not _allowed_file(file.filename):
         return jsonify({'error': 'Invalid file type. Allowed: MP4, AVI, MOV'}), 400
 
-    # Generate unique ID for this upload
     video_id = str(uuid.uuid4())
-
-    # Save uploaded file
     filename = secure_filename(file.filename)
     ext = filename.rsplit('.', 1)[1].lower()
-    input_path = os.path.join(app.config['UPLOAD_FOLDER'], f'{video_id}.{ext}')
-    output_path = os.path.join(app.config['RESULTS_FOLDER'], f'{video_id}_analyzed.{ext}')
-    report_path = os.path.join(app.config['RESULTS_FOLDER'], f'{video_id}_report.txt')
+
+    input_path = os.path.join(UPLOAD_FOLDER, f'{video_id}.{ext}')
+    output_path = os.path.join(RESULTS_FOLDER, f'{video_id}_analyzed.mp4')
+    report_path = os.path.join(RESULTS_FOLDER, f'{video_id}_report.txt')
 
     file.save(input_path)
 
-    # Initialize processing status
-    processing_status[video_id] = {
-        'status': 'queued',
-        'progress': 0,
-        'message': 'Upload complete, starting analysis...'
-    }
+    # Validate it's actually a video (magic bytes check)
+    if not _validate_video_magic(input_path):
+        os.remove(input_path)
+        return jsonify({'error': 'File does not appear to be a valid video'}), 400
 
-    # Start processing in background thread
-    thread = threading.Thread(
-        target=process_video,
-        args=(video_id, input_path, output_path, report_path)
-    )
-    thread.daemon = True
-    thread.start()
+    with status_lock:
+        processing_status[video_id] = {
+            'status': 'queued',
+            'progress': 0,
+            'message': 'Upload complete, queued for analysis...',
+        }
 
-    return jsonify({
-        'video_id': video_id,
-        'message': 'Video uploaded successfully, processing started'
-    }), 200
+    executor.submit(_process_video, video_id, input_path, output_path, report_path)
+    logger.info(f"[{video_id}] Queued for analysis (from {client_ip})")
+
+    return jsonify({'video_id': video_id, 'message': 'Upload successful, analysis queued'}), 200
+
 
 @app.route('/api/status/<video_id>', methods=['GET'])
 def get_status(video_id):
-    """Get processing status for a video"""
-    if video_id not in processing_status:
+    status = _get_status(video_id)
+    if not status:
         return jsonify({'error': 'Video not found'}), 404
+    return jsonify(status), 200
 
-    return jsonify(processing_status[video_id]), 200
 
 @app.route('/api/result/<video_id>/video', methods=['GET'])
 def get_result_video(video_id):
-    """Stream analyzed video for playback"""
-    # Find the file with any extension
-    for ext in ALLOWED_EXTENSIONS:
-        video_path = os.path.join(app.config['RESULTS_FOLDER'], f'{video_id}_analyzed.{ext}')
-        if os.path.exists(video_path):
-            # Determine correct mimetype
-            mimetype = 'video/mp4' if ext == 'mp4' else f'video/{ext}'
-            # Use as_attachment=False to allow inline playback
-            return send_file(
-                video_path,
-                mimetype=mimetype,
-                as_attachment=False,
-                download_name=f'{video_id}_analyzed.{ext}'
-            )
+    # Results are always saved as .mp4
+    video_path = os.path.join(RESULTS_FOLDER, f'{video_id}_analyzed.mp4')
+    if os.path.exists(video_path):
+        return send_file(video_path, mimetype='video/mp4', as_attachment=False)
 
-    return jsonify({'error': 'Video not found'}), 404
+    # Fallback: check other extensions (e.g. AVI if re-encode was skipped)
+    for ext in ALLOWED_EXTENSIONS:
+        alt_path = os.path.join(RESULTS_FOLDER, f'{video_id}_analyzed.{ext}')
+        if os.path.exists(alt_path):
+            mimetype = 'video/mp4' if ext == 'mp4' else f'video/{ext}'
+            return send_file(alt_path, mimetype=mimetype, as_attachment=False)
+
+    return jsonify({'error': 'Video result not found'}), 404
+
 
 @app.route('/api/result/<video_id>/report', methods=['GET'])
 def get_result_report(video_id):
-    """Get text report"""
-    report_path = os.path.join(app.config['RESULTS_FOLDER'], f'{video_id}_report.txt')
-
+    report_path = os.path.join(RESULTS_FOLDER, f'{video_id}_report.txt')
     if not os.path.exists(report_path):
         return jsonify({'error': 'Report not found'}), 404
+    with open(report_path, 'r') as fh:
+        return jsonify({'report': fh.read()}), 200
 
-    with open(report_path, 'r') as f:
-        report = f.read()
-
-    return jsonify({'report': report}), 200
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
-    return jsonify({'status': 'ok'}), 200
+    return jsonify({'status': 'ok', 'workers': MAX_WORKERS}), 200
 
+
+# ---------------------------------------------------------------------------
+# Entry point (dev server only — production uses gunicorn)
+# ---------------------------------------------------------------------------
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=not IS_PRODUCTION, host='0.0.0.0', port=5001)

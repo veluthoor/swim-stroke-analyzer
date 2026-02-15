@@ -200,42 +200,83 @@ class StrokeAnalyzer:
         }
 
     def _analyze_stroke_rate(self, frames: List[Dict]) -> Dict:
-        """Analyze stroke rate (strokes per minute)."""
-        # Detect stroke cycles by tracking wrist position peaks
-        # This is simplified - proper stroke detection needs more sophisticated algorithm
+        """
+        Analyze stroke rate (strokes per minute).
 
-        if len(frames) < 2:
+        Uses a smoothed wrist-x trajectory with minimum-distance peak detection
+        to avoid counting micro-jitters as stroke cycles.  Each detected peak in
+        the LEFT wrist trajectory represents one arm recovering forward, so
+        SPM = left-arm peaks × 2 (both arms) / duration_minutes.
+        """
+        if len(frames) < 10:
             return {'spm': None}
 
-        # Get video duration
-        duration = frames[-1]['timestamp'] - frames[0]['timestamp']
-
-        # Count approximate strokes by detecting wrist forward movement peaks
-        # Very simplified for MVP
-        left_wrist_x = []
+        # Collect (frame_timestamp, wrist_x) pairs for the left wrist
+        samples = []
         for frame in frames:
             landmarks = frame['pose']['landmarks']
             if landmarks['left_wrist']['visibility'] >= MIN_VISIBILITY:
-                left_wrist_x.append(landmarks['left_wrist']['x'])
+                samples.append((frame['timestamp'], landmarks['left_wrist']['x']))
 
-        # Count peaks (forward reaches)
-        if len(left_wrist_x) < 10:
+        if len(samples) < 10:
             return {'spm': None}
 
-        peaks = 0
-        for i in range(1, len(left_wrist_x) - 1):
-            if left_wrist_x[i] > left_wrist_x[i-1] and left_wrist_x[i] > left_wrist_x[i+1]:
-                peaks += 1
+        timestamps = [s[0] for s in samples]
+        wrist_x = [s[1] for s in samples]
+        duration = timestamps[-1] - timestamps[0]
 
-        # Calculate strokes per minute (2 arms)
-        strokes = peaks * 2
-        spm = (strokes / duration) * 60 if duration > 0 else None
+        if duration <= 0:
+            return {'spm': None}
+
+        # --- Smooth the trajectory to remove frame-level jitter ---
+        window = max(3, len(wrist_x) // 20)  # ~5% of samples, at least 3
+        smoothed = self._moving_average(wrist_x, window)
+
+        # --- Estimate minimum gap between peaks ---
+        # Assume a maximum realistic stroke rate of 100 SPM = 0.6 s/stroke.
+        # With the processed frame rate (samples spread over `duration`), that
+        # translates to a minimum sample-index gap.
+        fps_equiv = len(smoothed) / duration  # samples per second
+        min_peak_gap = max(3, int(fps_equiv * 0.5))  # at least 0.5 s between peaks
+
+        # --- Find peaks with minimum distance enforcement ---
+        candidate_peaks = []
+        for i in range(1, len(smoothed) - 1):
+            if smoothed[i] >= smoothed[i - 1] and smoothed[i] >= smoothed[i + 1]:
+                candidate_peaks.append(i)
+
+        # Keep only peaks that are far enough apart (greedy: first peak wins)
+        filtered_peaks = []
+        for peak in candidate_peaks:
+            if not filtered_peaks or (peak - filtered_peaks[-1]) >= min_peak_gap:
+                filtered_peaks.append(peak)
+
+        # Each left-wrist peak = one left-arm entry = 2 arm strokes total
+        total_strokes = len(filtered_peaks) * 2
+        spm = (total_strokes / duration) * 60
+
+        # Sanity check: clamp to a plausible swimming range (20–120 SPM)
+        if spm < 20 or spm > 120:
+            spm = None
 
         return {
             'spm': spm,
-            'total_strokes': strokes,
+            'total_strokes': total_strokes if spm is not None else None,
             'duration': duration
         }
+
+    @staticmethod
+    def _moving_average(values: List[float], window: int) -> List[float]:
+        """Apply a simple centred moving average to smooth a 1-D signal."""
+        if window < 2 or len(values) < window:
+            return list(values)
+        half = window // 2
+        smoothed = []
+        for i in range(len(values)):
+            lo = max(0, i - half)
+            hi = min(len(values), i + half + 1)
+            smoothed.append(sum(values[lo:hi]) / (hi - lo))
+        return smoothed
 
     def _analyze_kick(self, frames: List[Dict]) -> Dict:
         """Analyze kick technique - knee bend."""

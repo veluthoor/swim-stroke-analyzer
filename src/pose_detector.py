@@ -111,7 +111,8 @@ class PoseDetector:
                 'frame_number': frame_count,
                 'timestamp': frame_count / fps,
                 'pose': pose_result,
-                'frame': frame  # Store frame for visualization
+                # NOTE: frames are NOT stored here to avoid memory exhaustion.
+                # The visualizer re-reads frames directly from the source video.
             })
 
             frame_count += 1
