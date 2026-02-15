@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { API_BASE_URL } from '../config';
 
@@ -13,11 +13,7 @@ function ResultsComponent({ videoId, onReset }) {
   const [strengths, setStrengths] = useState([]);
   const videoRef = useRef(null);
 
-  useEffect(() => {
-    fetchReport();
-  }, [videoId]);
-
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/result/${videoId}/report`);
       const data = await response.json();
@@ -33,7 +29,11 @@ function ResultsComponent({ videoId, onReset }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [videoId]);
+
+  useEffect(() => {
+    fetchReport();
+  }, [fetchReport]);
 
   const parseReport = (reportText) => {
     // Extract score
@@ -49,7 +49,7 @@ function ResultsComponent({ videoId, onReset }) {
     }
 
     // Extract Biggest Red Flag
-    const redFlagMatch = reportText.match(/🚨 BIGGEST RED FLAG\n━+\n⚠️  (.+?)\n\n💡 HOW TO FIX IT:\n   (.+?)(?:\n\n|$)/s);
+    const redFlagMatch = reportText.match(/🚨 BIGGEST RED FLAG\n━+\n⚠️ {2}(.+?)\n\n💡 HOW TO FIX IT:\n {3}(.+?)(?:\n\n|$)/s);
     if (redFlagMatch) {
       setBiggestRedFlag({
         issue: redFlagMatch[1].trim(),
@@ -75,7 +75,7 @@ function ResultsComponent({ videoId, onReset }) {
       const actionItems = actionPlanMatch[1];
 
       // Extract critical issues
-      const criticalMatches = actionItems.matchAll(/\d+\. 🚨 FIX THIS FIRST: (.+?)\n   → (.+?)(?:\n\n|\n\d|$)/gs);
+      const criticalMatches = actionItems.matchAll(/\d+\. 🚨 FIX THIS FIRST: (.+?)\n {3}→ (.+?)(?:\n\n|\n\d|$)/gs);
       for (const match of criticalMatches) {
         parsedIssues.push({
           severity: 'critical',
@@ -85,7 +85,7 @@ function ResultsComponent({ videoId, onReset }) {
       }
 
       // Extract moderate issues
-      const moderateMatches = actionItems.matchAll(/\d+\. ⚠️ IMPORTANT: (.+?)\n   → (.+?)(?:\n\n|\n\d|$)/gs);
+      const moderateMatches = actionItems.matchAll(/\d+\. ⚠️ IMPORTANT: (.+?)\n {3}→ (.+?)(?:\n\n|\n\d|$)/gs);
       for (const match of moderateMatches) {
         parsedIssues.push({
           severity: 'moderate',
@@ -99,12 +99,6 @@ function ResultsComponent({ videoId, onReset }) {
   };
 
   const videoUrl = `${API_BASE_URL}/result/${videoId}/video`;
-
-  const getScoreColor = (score) => {
-    if (score >= 8) return '#36B37E';
-    if (score >= 6) return '#FFAB00';
-    return '#D32F2F';
-  };
 
   const getScoreEmoji = (score) => {
     if (score >= 9) return '🏆';

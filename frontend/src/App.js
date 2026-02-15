@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import UploadComponent from './components/UploadComponent';
 import ProcessingComponent from './components/ProcessingComponent';
