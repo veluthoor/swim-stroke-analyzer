@@ -46,7 +46,7 @@ EXPOSE 7860
 # Use threads for lightweight request concurrency (video jobs run in a ThreadPoolExecutor).
 CMD ["sh", "-c", \
      "gunicorn \
-       --bind 0.0.0.0:${PORT:-5001} \
+       --bind 0.0.0.0:${PORT:-7860} \
        --timeout 600 \
        --workers 1 \
        --threads 4 \
