@@ -1,3 +1,12 @@
+---
+title: Swim Stroke Analyzer
+emoji: 🏊
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # Swim Stroke Analyzer
 
 **Your AI swimming coach, available 24/7.**

@@ -39,8 +39,8 @@ COPY . .
 # Create upload/result directories
 RUN mkdir -p backend/uploads backend/results
 
-# Expose default port (overridden by $PORT at runtime on Render / Railway)
-EXPOSE 5001
+# HF Spaces injects PORT=7860; Render/Railway override via $PORT env var
+EXPOSE 7860
 
 # Single gunicorn worker to avoid OOM on resource-constrained free tiers.
 # Use threads for lightweight request concurrency (video jobs run in a ThreadPoolExecutor).
